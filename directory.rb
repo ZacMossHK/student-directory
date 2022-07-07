@@ -3,7 +3,7 @@ require 'date'
 
 # @students = []
 
-students = [
+@students = [
   {name: "Dr. Hannibal Lecter", cohort: :november},
   {name: "Darth Vader", cohort: :november},
   {name: "Nurse Ratched", cohort: :november},
@@ -70,6 +70,7 @@ end
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
+  puts "3. Save the list to students.csv"
   puts "9. Exit"
 end
 
@@ -83,17 +84,24 @@ def process(selection)
   case selection
     when "1" then input_students
     when "2" then show_students
+    when "3" then puts save_students
     when "9" then Exit
     else puts "I don't know what you meant, try again"
   end
 end
 
 def interactive_menu
-  @students = []
+  # @students = []
   loop do
     print_menu
     process(gets.chomp)
   end
+end
+
+def save_students
+  file = File.open("students.csv", "w")
+  @students.each { |student| file.puts "#{student[:name]}, #{student[:cohort]}" }
+  file.close
 end
 
 interactive_menu
