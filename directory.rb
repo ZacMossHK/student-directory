@@ -1,5 +1,7 @@
 require 'date'
-MONTHS = (1..12).map {|m| Date::MONTHNAMES[m].downcase.to_sym}
+@months = (1..12).map {|m| Date::MONTHNAMES[m].downcase.to_sym}
+
+# @students = []
 
 students = [
   {name: "Dr. Hannibal Lecter", cohort: :november},
@@ -15,8 +17,8 @@ students = [
   {name: "Norman Bates", cohort: :november}
 ]
 
-def print_header(names)
-  if names.empty?
+def print_header
+  if @students.empty?
     puts "We have no students"
   else
     puts "The students of Villains Academy"
@@ -24,16 +26,16 @@ def print_header(names)
   end
 end
 
-def print(names, by_cohort = false)
+def print_students_list(by_cohort = false)
   if !by_cohort
-    names.each_with_index { |student, idx|
+    @students.each_with_index { |student, idx|
       puts "#{idx}. #{student[:name]} (#{student[:cohort]} cohort)"
     }
   else
-    cohort_array = names.map { |student| student[:cohort]}.uniq.sort_by &MONTHS.method(:index)
+    cohort_array = @students.map { |student| student[:cohort]}.uniq.sort_by &@months.method(:index)
     count = 0
     cohort_array.each { |cohort|
-      names.select { |student| student[:cohort] == cohort }.each { |student| 
+      @students.select { |student| student[:cohort] == cohort }.each { |student| 
         puts "#{count}. #{student[:name]} (#{student[:cohort]} cohort)"
         count += 1
       }
@@ -41,15 +43,14 @@ def print(names, by_cohort = false)
   end
 end
 
-def print_footer(names)
-  puts "Overall, we have #{names.count} great student#{"s" if names.count != 1}" if !names.empty?
+def print_footer
+  puts "Overall, we have #{@students.count} great student#{"s" if @students.count != 1}" if !@students.empty?
 end
 
 def input_students
-  months_hash = MONTHS.each_with_object({}) { |month, hash| hash[MONTHS.index(month) + 1] = month}
+  months_hash = @months.each_with_object({}) { |month, hash| hash[@months.index(month) + 1] = month}
   puts "Please enter the names of the students"
   puts "To finish, just hit return"
-  students = []
   name = gets.chomp
   while !name.empty?
     cohort = ""
@@ -60,35 +61,39 @@ def input_students
       break if months_hash.values.include? cohort
       puts "You did not enter a valid cohort"
     end
-    students << {name: name, cohort: cohort}
-    puts "Now we have #{students.count} student#{"s" if students.count != 1}"
+    @students << {name: name, cohort: cohort}
+    puts "Now we have #{@students.count} student#{"s" if @students.count != 1}"
     name = gets.chomp
   end
-  students
+end
+
+def print_menu
+  puts "1. Input the students"
+  puts "2. Show the students"
+  puts "9. Exit"
+end
+
+def show_students
+  print_header
+  print_students_list
+  print_footer
+end
+
+def process(selection)
+  case selection
+    when "1" then input_students
+    when "2" then show_students
+    when "9" then Exit
+    else puts "I don't know what you meant, try again"
+  end
 end
 
 def interactive_menu
-  students = []
+  @students = []
   loop do
-    #1. print the menu and ask the user what to do
-    puts "1. Input the students"
-    puts "2. Show the students"
-    puts "9. Exit" # 9 because we'll be adding more items
-    selection = gets.chomp
-    case selection
-      when "1" then students = input_students
-      when "2"
-        print_header(students)
-        print(students, true)
-        print_footer(students)
-      when "9" then Exit
-      else puts "I don't know what you meant, try again"
-    end
+    print_menu
+    process(gets.chomp)
   end
 end
 
 interactive_menu
-# students = input_students
-# print_header(students)
-# print(students, true)
-# print_footer(students)
