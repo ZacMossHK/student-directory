@@ -50,19 +50,19 @@ def input_students
   @months_hash = @months.each_with_object({}) { |month, hash| hash[@months.index(month) + 1] = month}
   puts "Please enter the names of the students"
   puts "To finish, just hit return"
-  name = gets.chomp
+  name = STDIN.gets.chomp
   while !name.empty?
     cohort = cohort_loop
     @students << {name: name, cohort: cohort}
     puts "Now we have #{@students.count} student#{"s" if @students.count != 1}"
-    name = gets.chomp
+    name = STDIN.gets.chomp
   end
 end
 
 def cohort_loop
   loop {
       puts "Enter a cohort or hit return for the current month"
-      cohort = gets.chomp
+      cohort = STDIN.gets.chomp
       cohort = (cohort.empty?) ? @months_hash[Date.today.strftime("%m").to_i] : cohort.downcase.to_sym
       return cohort if @months_hash.values.include? cohort
       puts "You did not enter a valid cohort"
@@ -95,10 +95,10 @@ def process(selection)
 end
 
 def interactive_menu
-  # @students = []
+  try_load_students
   loop {
     print_menu
-    process(gets.chomp)
+    process(STDIN.gets.chomp)
   }
 end
 
@@ -108,13 +108,25 @@ def save_students
   file.close
 end
 
-def load_students
-  file = File.open("students.csv", "r")
+def load_students(filename = "students.csv")
+  file = File.open(filename, "r")
   file.readlines.each { |line|
     name, cohort = line.chomp.split(',')
     @students << {name: name, cohort: cohort.to_sym}
   }
   file.close
+end
+
+def try_load_students
+  filename = ARGV.first
+  return if filename.nil?
+  if File.exist?(filename)
+    load_students(filename)
+    puts "Loaded #{@students.count} from #{filename}"
+  else
+    puts "Sorry, #{filename} doesn't exist."
+    exit
+  end
 end
 
 interactive_menu
